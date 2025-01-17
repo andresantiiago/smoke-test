@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  labels:
+    track: stable
+spec:
+  replicas: 2
+  selector:
+      matchLabels:
+        app: my-app
+        tier: BE
+  template:
+    metadata:
+      labels:
+        app: my-app
+        tier: BE
+        workstations: ingress
+        workstations-ingress-http-alt: allow
+        workstations-ingress-http: allow
+        internet: ingress
+        internet-ingress-http: allow
+        internet-ingress-https: allow
+    spec:
+      containers:
+      - image: registry.svc.intranet/treinamento/node-hello:v0.0.4
+        name: node-hello
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 50m
+            memory: 128Mi
+          requests:
+            cpu: 20m
+            memory: 64Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 30
+      - name: network-multitool
+        image: registry.svc.intranet/l-pd-kubernetes/praqma-network-multitool
+        resources:
+          limits:
+            cpu: 50m
+            memory: 128Mi
+          requests:
+            cpu: 20m
+            memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: my-app
+    tier: BE
+  type: ClusterIP

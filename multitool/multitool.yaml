@@ -11,23 +11,24 @@ spec:
         app: multitool
   template:
     metadata:
+      annotations:
+        co.elastic.logs/enabled: 'true'
       labels:
         app: multitool
-        internal: egress
-        internal-egress-http: allow
-        internal-egress-https: allow
+        internal: ingress
+        internal-ingress-http: allow
         workstations: ingress
         workstations-ingress-http: allow
     spec:
       containers:
       - name: network-multitool
-        image: wbitt/network-multitool
+        image: registry.svc.intranet/l-pd-kubernetes/praqma-network-multitool
         resources:
-          requests:
-            memory: "10Mi"
-            cpu: "10m"
           limits:
-            memory: "20Mi"
+            memory: "100Mi"
+            cpu: "50m"
+          requests:
+            memory: "50Mi"
             cpu: "20m"
 ---
 apiVersion: v1
@@ -48,17 +49,17 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: multitool-ingress
+  name: ingress-multitool
 spec:
   ingressClassName: ingress-controller-internal
   rules:
-  - host: multitool.example.com
+  - host: multitool.intranet
     http:
       paths:
-      - path: /
-        pathType: Prefix
-        backend:
+      - backend:
           service:
             name: multitool
             port:
               number: 80
+        path: /
+        pathType: Prefix

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: network-multitool
+  labels:
+    track: stable
+spec:
+  selector:
+      matchLabels:
+        app: network
+  template:
+    metadata:
+      labels:
+        app: network
+        workstations: ingress
+        workstations-ingress-http: allow
+        internet: ingress
+        internet-ingress-http: allow
+        internet-ingress-https: allow
+    spec:
+      nodeSelector:
+        nodetype: node            
+      containers:
+      - name: network-multitool
+        image: registry.svc.intranet/l-pd-kubernetes/praqma-network-multitool
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: network-multitool
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: network
+  type: ClusterIP

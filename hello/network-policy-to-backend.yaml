@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-to-backend
+spec:
+  policyTypes:
+  - Ingress
+  - Egress
+  egress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - podSelector:
+        matchLabels:
+          app: my-app
+          tier: BE 
+  podSelector:
+    matchLabels:
+      app: my-app
+      tier: FE
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-from-frontend
+spec:
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    from:
+    - podSelector:
+        matchLabels:
+          app: my-app
+          tier: FE 
+  podSelector:
+    matchLabels:
+      app: my-app
+      tier: BE
+
